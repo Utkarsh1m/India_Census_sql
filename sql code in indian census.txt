@@ -1,0 +1,84 @@
+--- 1 dataset for jharkhand and bihar --
+
+      select * from dataset1 where state in ("jharkhand","bihar");
+
+----- 2 population of india
+       
+      select sum(cast(replace(Population,",","")as unsigned))as  population from census.dataset2 ;
+
+----- 3 What was the average growth of india
+     
+      select round(avg(growth),2) from dataset1 ;
+
+---- 4 avg growth by state
+ 
+      select state,round(avg(growth),2) state_growth from dataset1 group by state;
+
+---- 5  avg sex ratio
+  
+      select state,round(avg(sex_ratio),0) avg_sex_ratio from dataset1 group by state order by avg_sex_ratio desc;
+
+----- 6  states who are above 90% in avg literacy rate
+
+      select state,round(avg(literacy),0) avg_literacy from dataset1 group by state having  avg_literacy >90 ;
+
+----- 7 top 3 state showing highest growth rate
+
+     select state,round(avg(growth),0) state_growth from dataset1 group by state order by state_growth desc limit 3;
+
+----- 8  bottom 3 state showing lowest sex ratio
+  
+     select state,round(avg(sex_ratio),0) sex_ratio from dataset1 group by state order by Sex_Ratio desc limit 3;
+
+-----  9 top & bottom 3 states in literacy state
+
+       drop table if exists top_states;
+       CREATE TEMPORARY TABLE top_states 
+      (state TEXT, avg_literacy FLOAT);
+
+    INSERT INTO top_states (state, avg_literacy)
+    SELECT state, ROUND(AVG(literacy), 0) AS avg_literacy
+    FROM dataset1
+    GROUP BY state
+    ORDER BY avg_literacy DESC
+    LIMIT 3;
+
+     drop table if exists bottom_states;
+     create temporary table bottom_states
+     (state text, avg_literacy float);
+     insert into bottom_states (state,avg_literacy)
+     SELECT state, ROUND(AVG(literacy), 0) AS avg_literacy
+     FROM dataset1
+     GROUP BY state
+     ORDER BY avg_literacy 
+     LIMIT 3;
+
+    SELECT *,'Top' AS category FROM top_states
+    UNION ALL
+    SELECT *,'Bottom' AS category FROM bottom_states;
+
+----- 10 -states starting with letter a and b
+
+select distinct state from dataset1 where state	like "a%" or state like "b%";
+
+------ 11  states starting with letter a and ending with letter m
+
+select distinct state from dataset1 where state	like "a%m" ;
+
+--- 12 join  the tables and get the sex_ratio,population state & district wise and total males and females ?
+
+select district,state,sex_ratio,population,round((population/(sex_ratio +1))) total_male,
+round((population*sex_ratio)/(sex_ratio+1)) total_female from
+(select d1.district,d1.state,d1.sex_ratio/1000 sex_ratio,d2.population from dataset1 d1 join dataset2 d2
+on d1.district = d2.district)a;
+
+
+
+
+
+
+
+
+
+
+
